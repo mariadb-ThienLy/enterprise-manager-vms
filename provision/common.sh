@@ -63,4 +63,15 @@ cat /etc/apt/sources.list.d/mariadb.sources
 echo "Running apt-get update..."
 apt-get update -y
 
+# Install mema-agent
+echo "Installing mema-agent..."
+apt-get install -y mema-agent
+
+# Verify mema-agent services are running
+echo "Verifying mema-agent services..."
+sleep 2
+systemctl status mema-agent-mariadb-exporter.service || true
+systemctl status mema-agent-node-exporter.service || true
+systemctl status mema-agent-otelcol.service || true
+
 echo "=== Common provisioning completed ==="
