@@ -1,0 +1,6 @@
+topology: standalone
+nodes:
+  - name: sa-server-0
+    ip: 192.168.56.10
+    role: standalone
+    server_id: 1

@@ -1,0 +1,14 @@
+topology: primary-replica
+nodes:
+  - name: pr-primary
+    ip: 192.168.56.11
+    role: primary
+    server_id: 11
+  - name: pr-replica-1
+    ip: 192.168.56.12
+    role: replica
+    server_id: 12
+  - name: pr-replica-2
+    ip: 192.168.56.13
+    role: replica
+    server_id: 13

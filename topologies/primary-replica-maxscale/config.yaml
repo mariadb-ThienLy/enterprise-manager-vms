@@ -1,0 +1,18 @@
+topology: primary-replica-maxscale
+nodes:
+  - name: prm-primary
+    ip: 192.168.56.21
+    role: primary
+    server_id: 21
+  - name: prm-replica-1
+    ip: 192.168.56.22
+    role: replica
+    server_id: 22
+  - name: prm-replica-2
+    ip: 192.168.56.23
+    role: replica
+    server_id: 23
+  - name: prm-maxscale
+    ip: 192.168.56.24
+    role: maxscale
+    server_id: 24

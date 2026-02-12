@@ -1,0 +1,26 @@
+topology: mixed-2-maxscale
+nodes:
+  - name: m2m-primary
+    ip: 192.168.56.51
+    role: primary
+    server_id: 51
+  - name: m2m-replica
+    ip: 192.168.56.52
+    role: replica
+    server_id: 52
+  - name: m2m-galera-1
+    ip: 192.168.56.53
+    role: galera
+    server_id: 53
+  - name: m2m-galera-2
+    ip: 192.168.56.54
+    role: galera
+    server_id: 54
+  - name: m2m-maxscale-1
+    ip: 192.168.56.55
+    role: maxscale
+    server_id: 55
+  - name: m2m-maxscale-2
+    ip: 192.168.56.56
+    role: maxscale
+    server_id: 56

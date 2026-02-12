@@ -1,0 +1,14 @@
+topology: galera
+nodes:
+  - name: ga-server-1
+    ip: 192.168.56.31
+    role: galera
+    server_id: 31
+  - name: ga-server-2
+    ip: 192.168.56.32
+    role: galera
+    server_id: 32
+  - name: ga-server-3
+    ip: 192.168.56.33
+    role: galera
+    server_id: 33

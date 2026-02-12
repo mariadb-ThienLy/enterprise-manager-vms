@@ -1,0 +1,95 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu2204"
+  config.vm.provider :libvirt do |lv|
+    lv.memory = 2048
+    lv.cpus = 2
+  end
+
+  # Resolve the real path of this Vagrantfile (following symlinks)
+  # This file is at topologies/Vagrantfile, so root is one level up
+  vagrantfile_real_path = File.realpath(__FILE__)
+  root_dir = File.dirname(File.dirname(vagrantfile_real_path))
+
+  # Load .env file for enterprise token
+  env_file = File.join(root_dir, ".env")
+  enterprise_token = ""
+  if File.exist?(env_file)
+    File.readlines(env_file).each do |line|
+      if line.match?(/^ENTERPRISE_TOKEN=/)
+        enterprise_token = line.split("=", 2)[1].strip
+      end
+    end
+  end
+
+  # Load topology config from current directory
+  config_file = File.join(Dir.pwd, "config.yaml")
+  raise "config.yaml not found in #{Dir.pwd}" unless File.exist?(config_file)
+
+  require 'yaml'
+  topology_config = YAML.load_file(config_file)
+  topology = topology_config['topology']
+  nodes = topology_config['nodes']
+
+  # Compute helper values for env vars
+  db_nodes = nodes.select { |n| n['role'] != "maxscale" }
+  primary_ip = db_nodes.select { |n| n['role'] == "primary" }.map { |n| n['ip'] }.first || ""
+  galera_ips = db_nodes.select { |n| n['role'] == "galera" }.map { |n| n['ip'] }.join(",")
+  backend_ips = db_nodes.map { |n| n['ip'] }.join(",")
+  backend_names = db_nodes.map { |n| n['name'] }.join(",")
+
+  nodes.each_with_index do |node, index|
+    config.vm.define node['name'] do |vm_config|
+      vm_config.vm.hostname = node['name']
+      vm_config.vm.network "private_network", ip: node['ip']
+
+      vm_config.vm.provider :libvirt do |lv|
+        lv.memory = 2048
+        lv.cpus = 2
+      end
+
+      # Common env vars for all provisioning scripts
+      env = {
+        "ROLE"                        => node['role'],
+        "NODE_IP"                     => node['ip'],
+        "NODE_NAME"                   => node['name'],
+        "TOPOLOGY"                    => topology,
+        "SERVER_ID"                   => node['server_id'].to_s,
+        "PRIMARY_IP"                  => primary_ip,
+        "GALERA_IPS"                  => galera_ips,
+        "BACKEND_IPS"                 => backend_ips,
+        "BACKEND_NAMES"               => backend_names,
+        "NODE_INDEX"                  => index.to_s,
+        "ENTERPRISE_TOKEN"   => enterprise_token
+      }
+
+      # Phase 1: Common system prep
+      vm_config.vm.provision "shell", path: File.join(root_dir, "provision/common.sh"), env: env
+
+      # Phase 2: Copy MaxScale tarball if this is a maxscale node
+      if node['role'] == "maxscale"
+        maxscale_tarball = File.join(root_dir, "maxscale-25.10.1-release.ubuntu.jammy.x86_64.tar")
+        if File.exist?(maxscale_tarball)
+          vm_config.vm.provision "file", source: maxscale_tarball, destination: "/tmp/maxscale-25.10.1-release.ubuntu.jammy.x86_64.tar"
+        end
+      end
+
+      # Phase 3: Role-specific provisioning
+      case node['role']
+      when "standalone"
+        vm_config.vm.provision "shell", path: File.join(root_dir, "provision/standalone.sh"), env: env
+      when "primary"
+        vm_config.vm.provision "shell", path: File.join(root_dir, "provision/primary.sh"), env: env
+      when "replica"
+        vm_config.vm.provision "shell", path: File.join(root_dir, "provision/replica.sh"), env: env
+      when "galera"
+        vm_config.vm.provision "shell", path: File.join(root_dir, "provision/galera.sh"), env: env
+      when "maxscale"
+        if topology == "mixed-2-maxscale"
+          vm_config.vm.provision "shell", path: File.join(root_dir, "provision/maxscale-mixed.sh"), env: env
+        else
+          vm_config.vm.provision "shell", path: File.join(root_dir, "provision/maxscale.sh"), env: env
+        end
+      end
+    end
+  end
+end

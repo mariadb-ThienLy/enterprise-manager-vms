@@ -1,0 +1,18 @@
+topology: galera-maxscale
+nodes:
+  - name: gam-server-1
+    ip: 192.168.56.41
+    role: galera
+    server_id: 41
+  - name: gam-server-2
+    ip: 192.168.56.42
+    role: galera
+    server_id: 42
+  - name: gam-server-3
+    ip: 192.168.56.43
+    role: galera
+    server_id: 43
+  - name: gam-maxscale
+    ip: 192.168.56.44
+    role: maxscale
+    server_id: 44
