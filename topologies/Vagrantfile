@@ -82,7 +82,7 @@ Vagrant.configure("2") do |config|
       when "replica"
         vm_config.vm.provision "shell", path: File.join(root_dir, "provision/replica.sh"), env: env
       when "galera"
-        vm_config.vm.provision "shell", path: File.join(root_dir, "provision/galera.sh"), env: env
+        vm_config.vm.provision "shell", path: File.join(root_dir, "provision/galera.sh"), env: env, run: "always"
       when "maxscale"
         if topology == "mixed-2-maxscale"
           vm_config.vm.provision "shell", path: File.join(root_dir, "provision/maxscale-mixed.sh"), env: env
