@@ -4,7 +4,7 @@ A reproducible Vagrant-based infrastructure for deploying and testing multiple M
 
 ## Overview
 
-This project provides automated provisioning of MariaDB Enterprise Server in various configurations using Vagrant and libvirt. Each topology is self-contained in its own directory with tab-completion support for easy access.
+This project provides automated provisioning of MariaDB Enterprise Server in various configurations using Vagrant and libvirt. Each topology is self-contained in its own directory for easy access.
 
 ## Supported Topologies
 
